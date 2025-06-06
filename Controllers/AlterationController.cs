@@ -57,6 +57,21 @@ namespace api_stock.Controllers
             return Created();
         }
 
+        [HttpPost("updateItem")]
+        public async Task<IActionResult> UpdateItem(UpdateItemDto itemDto)
+        {
+            if (itemDto == null) return BadRequest("Item não pode ser nulo");
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!await _itemRepository.ItemExists(itemDto.Id)) return NotFound("Item não existe");
+            if (itemDto.ContainerId.HasValue)
+            {
+                if (!await _containerRepository.ContainerExists(itemDto.ContainerId.Value)) return BadRequest("Container não existe");
+            }
+            var itemModel = await _itemRepository.UpdateItemAsync(itemDto);
+            if (itemModel == null) return NotFound();
+            return Ok();
+        }
+
         [HttpPost("newContainer")]
         public async Task<IActionResult> CreateContainer(CreateContainerDto containerDto)
         {

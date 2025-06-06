@@ -16,8 +16,7 @@ namespace api_stock.Interfaces
         Task<Item?> DeleteItemAsync(int itemId);
 
         Task<Item> UpdateItemAsync(UpdateItemDto item);
-
-        Task UpdateItemContainerAsync(int itemId, int newContainerId/*, User user*/);
+        Task<bool> ItemExists(int id);
 
     }
 }
