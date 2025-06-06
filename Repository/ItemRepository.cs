@@ -50,15 +50,12 @@ namespace api_stock.Repository
 
         public async Task<Item> UpdateItemAsync(UpdateItemDto itemDto/*, User user*/)
         {
-            var existingItem = await _context.Items.FirstOrDefaultAsync(i => i.Id == itemDto.Id /*&& i.UserId == user.Id*/);
-            if (existingItem == null)
-            {
-                throw new InvalidOperationException("Item not found or does not belong to the user.");
-            }
+            var existingItem = await _context.Items.FirstOrDefaultAsync(i => i.Id == itemDto.Id /*&& i.UserId == user.Id*/) ?? throw new InvalidOperationException("Item not found or does not belong to the user.");
 
             existingItem.Name = itemDto.Name;
             existingItem.Description = itemDto.Description;
             existingItem.Tags = itemDto.Tags;
+            existingItem.ContainerId = itemDto.ContainerId;
             existingItem.Amount = itemDto.Amount;
             existingItem.ImagePath = itemDto.ImagePath;
 
@@ -68,21 +65,9 @@ namespace api_stock.Repository
             return existingItem;
         }
 
-        public async Task UpdateItemContainerAsync(int itemId, int newContainerId/*, User user*/)
+        public Task<bool> ItemExists(int id)
         {
-            var item = await _context.Items.FirstOrDefaultAsync(i => i.Id == itemId /*&& i.UserId == user.Id*/);
-            var container = await _context.Containers.FirstOrDefaultAsync(c => c.Id == newContainerId /*&& c.UserId == user.Id*/);
-
-            if (item != null && container != null)
-            {
-                item.ContainerId = newContainerId;
-                await _context.SaveChangesAsync();
-            }
-            else
-            {
-                throw new InvalidOperationException("Item or container not found or does not belong to the user.");
-            }
-
+            return _context.Items.AnyAsync(e => e.Id == id);
         }
     }
 }
