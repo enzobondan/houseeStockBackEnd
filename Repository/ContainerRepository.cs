@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api_stock.Data;
+using api_stock.Dtos.Container;
 using api_stock.Interfaces;
 using api_stock.Models;
 using Microsoft.EntityFrameworkCore;
@@ -19,8 +20,32 @@ namespace api_stock.Repository
             _context = context;
         }
 
-        public async Task<Container> CreateContainerAsync(Container container/*,User user*/)
+        public async Task<Container> CreateContainerAsync(CreateContainerDto containerDto/*,User user*/)
         {
+
+            var tagNames = containerDto.Tags ?? [];
+
+            var existingTags = await _context.Tags
+                .Where(t => tagNames.Contains(t.Name))
+                .ToListAsync();
+
+            if (existingTags.Count != tagNames.Count)
+            {
+                throw new InvalidOperationException("One or more tags do not exist.");
+            }
+
+
+            var container = new Container
+            {
+                Name = containerDto.Name,
+                Description = containerDto.Description,
+                Tags = existingTags,
+                ParentContainerId = containerDto.ParentContainerId,
+                PlaceId = containerDto.PlaceId,
+
+                ImagePath = containerDto.ImagePath
+            };
+
             await _context.Containers.AddAsync(container);
             await _context.SaveChangesAsync();
             return container;
@@ -28,7 +53,9 @@ namespace api_stock.Repository
 
         public async Task<List<Container>> GetAllContainers()
         {
-            return await _context.Containers.Select(c => new Container
+            return await _context.Containers
+            .Include(c => c.Tags)
+            .Select(c => new Container
             {
                 Id = c.Id,
                 Name = c.Name,
@@ -36,23 +63,13 @@ namespace api_stock.Repository
                 ParentContainerId = c.ParentContainerId,
                 PlaceId = c.PlaceId,
                 ImagePath = c.ImagePath,
+                Tags = c.Tags
             }).ToListAsync();
         }
 
         public Task<bool> ContainerExists(int id)
         {
             return _context.Containers.AnyAsync(e => e.Id == id);
-        }
-
-
-        public Task<List<Container>> GetContainersAndItemsAsync(/*User user*/)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<Container>> GetContainersHierarchyAsync()
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<Container?> SafeDeleteContainerAsync(int containerId/*,User user*/)
@@ -79,10 +96,49 @@ namespace api_stock.Repository
             return container;
         }
 
-        public Task<Container?> UpdateContainerAsync(Container container/*,User user*/)
+        public async Task<bool?> UpdateContainerAsync(ContainerDto dto)
         {
-            throw new NotImplementedException();
+            var existing = await _context.Containers
+            .Include(c => c.Tags)
+            .FirstOrDefaultAsync(c => c.Id == dto.Id);
+            if (existing == null) return null;
+
+            if (dto.ParentContainerId.HasValue)
+            {
+                var parentExists = await _context.Containers.AnyAsync(c => c.Id == dto.ParentContainerId.Value);
+                if (!parentExists) return false;
+            }
+
+            if (dto.PlaceId.HasValue)
+            {
+                var placeExists = await _context.Places.AnyAsync(p => p.Id == dto.PlaceId.Value);
+                if (!placeExists) return false;
+            }
+
+            var tagNames = dto.Tags ?? [];
+
+            var existingTags = await _context.Tags
+                .Where(t => tagNames.Contains(t.Name))
+                .ToListAsync();
+
+            if (existingTags.Count != tagNames.Count)
+            {
+                throw new InvalidOperationException("One or more tags do not exist.");
+            }
+
+            existing.Name = dto.Name;
+            existing.Description = dto.Description;
+            existing.Tags = existingTags;
+            existing.ParentContainerId = dto.ParentContainerId;
+            existing.PlaceId = dto.PlaceId;
+            existing.ImagePath = dto.ImagePath;
+
+            _context.Containers.Update(existing);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
+
 
         public async Task UpdateContainerParentAsync(int containerId, int? newParentId/*,User user*/)
         {
@@ -92,6 +148,37 @@ namespace api_stock.Repository
                 container.ParentContainerId = newParentId;
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<Container?> GetContainerByIdAsync(int containerId)
+        {
+            var root = await _context.Containers
+                .Include(c => c.Items)
+                .Include(c => c.Tags)
+                    
+                .FirstOrDefaultAsync(c => c.Id == containerId);
+
+            if (root == null)
+                return null;
+
+            var allContainers = await _context.Containers
+                .Include(c => c.Items)
+                .Include(c => c.Tags)
+                .ToListAsync();
+
+            var lookup = allContainers.ToLookup(c => c.ParentContainerId);
+
+            void BuildTree(Container parent)
+            {
+                parent.Containers = lookup[parent.Id].ToList();
+                foreach (var child in parent.Containers)
+                {
+                    BuildTree(child);
+                }
+            }
+
+            BuildTree(root);
+            return root;
         }
     }
 }

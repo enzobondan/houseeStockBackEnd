@@ -13,7 +13,7 @@ namespace api_stock.Models
 
         public string? Description { get; set; }
 
-        public List<string> Tags { get; set; } = new List<string>();
+        public List<Tag> Tags { get; set; } = [];
 
         //parent
         public int? ContainerId { get; set; }

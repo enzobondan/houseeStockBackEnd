@@ -14,11 +14,11 @@ namespace api_stock.Interfaces
 
         Task<Place?> GetFullPlaceByIdAsync(int placeId);
 
-        Task<Place> CreatePlaceAsync(Place place);
+        Task<Place> CreatePlaceAsync(CreatePlaceDto place);
 
         Task<Place?> SafeDeletePlaceAsync(int placeId);
 
-        Task<Place?> UpdatePlaceAsync(UpdatePlaceDto place);
+        Task<Place?> UpdatePlaceAsync(PlaceDto place);
 
         Task<bool> PlaceExists(int id);
     }

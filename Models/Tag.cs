@@ -5,20 +5,17 @@ using System.Threading.Tasks;
 
 namespace api_stock.Models
 {
-    public class Place
+    public class Tag
     {
         public int Id { get; set; }
 
         public required string Name { get; set; }
 
-        public required string Description { get; set; }
-
-        public List<Tag> Tags { get; set; } = new();
+        public List<Item> Items { get; set; } = new List<Item>();
 
         public List<Container> Containers { get; set; } = new List<Container>();
 
-        //public required string UserId { get; set; }
-
-        //public required User User { get; set; }
+        public List<Place> Places { get; set; } = new List<Place>();
+        
     }
 }

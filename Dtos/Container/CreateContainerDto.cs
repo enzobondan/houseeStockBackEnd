@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using api_stock.Models;
 
 namespace api_stock.Dtos.Container
 {
@@ -11,12 +12,12 @@ namespace api_stock.Dtos.Container
 
         public required string Description { get; set; }
 
-        public List<string> Tags { get; set; } = new List<string>();
+        public List<string> Tags { get; set; } = [];
 
         public int? ParentContainerId { get; set; }
 
         public int? PlaceId { get; set; }
-        
+
         public string? ImagePath { get; set; }
     }
 }

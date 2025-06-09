@@ -19,8 +19,26 @@ namespace api_stock.Repository
         {
             _context = context;
         }
-        public async Task<Place> CreatePlaceAsync(Place place/*, User user*/)
+        public async Task<Place> CreatePlaceAsync(CreatePlaceDto placeDto/*, User user*/)
         {
+
+            var tagNames = placeDto.Tags ?? [];
+
+            var existingTags = await _context.Tags
+                .Where(t => tagNames.Contains(t.Name))
+                .ToListAsync();
+
+            if (existingTags.Count != tagNames.Count)
+            {
+                throw new InvalidOperationException("One or more tags do not exist.");
+            }
+
+            var place = new Place
+            {
+                Name = placeDto.Name,
+                Description = placeDto.Description,
+                Tags = existingTags
+            };
             await _context.Places.AddAsync(place);
             await _context.SaveChangesAsync();
             return place;
@@ -28,7 +46,7 @@ namespace api_stock.Repository
 
         public async Task<Place?> GetFullPlaceByIdAsync(int placeId)
         {
-            var place = await _context.Places
+            var place = await _context.Places.Include(c => c.Tags)
                 .FirstOrDefaultAsync(p => p.Id == placeId);
             if (place == null)
                 return null;
@@ -36,6 +54,7 @@ namespace api_stock.Repository
             var allContainers = await _context.Containers
                 .Where(c => c.PlaceId == placeId)
                 .Include(c => c.Items)
+                .Include(c => c.Tags)
                 .ToListAsync();
 
             var lookup = allContainers.ToLookup(c => c.ParentContainerId);
@@ -88,15 +107,30 @@ namespace api_stock.Repository
             return place;
         }
 
-        public async Task<Place?> UpdatePlaceAsync(UpdatePlaceDto placeDto/*, User user*/)
+        public async Task<Place?> UpdatePlaceAsync(PlaceDto placeDto/*, User user*/)
         {
             var existingPlace = await _context.Places.FirstOrDefaultAsync(p => p.Id == placeDto.Id /*&& p.UserId == user.Id*/);
             if (existingPlace == null)
             {
                 return null;
             }
+
+
+            var tagNames = placeDto.Tags ?? [];
+
+            var existingTags = await _context.Tags
+                .Where(t => tagNames.Contains(t.Name))
+                .ToListAsync();
+
+            if (existingTags.Count != tagNames.Count)
+            {
+                throw new InvalidOperationException("One or more tags do not exist.");
+            }
+
+
             existingPlace.Name = placeDto.Name;
             existingPlace.Description = placeDto.Description;
+            existingPlace.Tags = existingTags;
 
             await _context.SaveChangesAsync();
             return existingPlace;

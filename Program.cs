@@ -23,6 +23,7 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 builder.Services.AddScoped<PlaceInterface, PlaceRepository>();
 builder.Services.AddScoped<ItemInterface, ItemRepository>();
 builder.Services.AddScoped<ContainerInterface, ContainerRepository>();
+builder.Services.AddScoped<TagInterface, TagRepository>();
 
 var app = builder.Build();
 

@@ -8,3 +8,5 @@ obj/
 
 # IDE/Editor files
 .vs/
+
+Migrations/

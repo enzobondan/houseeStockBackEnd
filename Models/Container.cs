@@ -11,7 +11,7 @@ namespace api_stock.Models
 
         public required string Name { get; set; }
 
-        public List<string> Tags { get; set; } = new List<string>();
+        public List<Tag> Tags { get; set; } = [];
 
         public string? Description { get; set; }
 
