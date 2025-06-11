@@ -93,7 +93,7 @@ namespace api_stock.Controllers
 
 
 
-        [HttpGet("AllPossesions")]
+        [HttpGet("AllPossessions")]
         public async Task<IActionResult> GetAllPossessions()
         {
             var containers = await _containerRepository.GetAllContainers();
