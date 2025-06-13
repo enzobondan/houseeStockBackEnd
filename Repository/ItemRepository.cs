@@ -79,15 +79,20 @@ namespace api_stock.Repository
             return await _context.Items.ToListAsync();
         }
 
-        public async Task<Item> GetItemByIdAsync(int itemId/*, User user*/)
+        public async Task<ItemDto> GetItemByIdAsync(int itemId/*, User user*/)
         {
 
-            var existingItem = await _context.Items.Include(c => c.Tags).FirstOrDefaultAsync(i => i.Id == itemId /*&& i.UserId == user.Id*/);
-            if (existingItem == null)
+            var existingItem = await _context.Items.Include(c => c.Tags).FirstOrDefaultAsync(i => i.Id == itemId /*&& i.UserId == user.Id*/) ?? throw new InvalidOperationException("Item not found or does not belong to the user.");
+            return new ItemDto
             {
-                throw new InvalidOperationException("Item not found or does not belong to the user.");
-            }
-            return existingItem;
+                Id = existingItem.Id,
+                Name = existingItem.Name,
+                Description = existingItem.Description,
+                Tags = existingItem.Tags?.Select(t => t.Name).ToList() ?? [],
+                ContainerId = existingItem.ContainerId,
+                Amount = existingItem.Amount,
+                ImagePath = existingItem.ImagePath
+            };
         }
 
         public async Task<Item> UpdateItemAsync(ItemDto itemDto/*, User user*/)
@@ -122,5 +127,11 @@ namespace api_stock.Repository
         {
             return _context.Items.AnyAsync(e => e.Id == id);
         }
+
+        public async Task MarkItemAsModified(Item item)
+        {
+            await _context.SaveChangesAsync();
+            }
+        
     }
 }

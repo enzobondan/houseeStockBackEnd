@@ -19,7 +19,7 @@ namespace api_stock.Dtos
 
         public int? ContainerId { get; set; }
 
-        public int? Amount { get; set; }
+        public double? Amount { get; set; }
 
         public string? ImagePath { get; set; }
 

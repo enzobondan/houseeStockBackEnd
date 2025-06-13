@@ -14,6 +14,8 @@ namespace api_stock.Interfaces
 
         Task<Place?> GetFullPlaceByIdAsync(int placeId);
 
+        Task<PlaceDto?> GetPlaceByIdAsync(int placeId);
+
         Task<Place> CreatePlaceAsync(CreatePlaceDto place);
 
         Task<Place?> SafeDeletePlaceAsync(int placeId);

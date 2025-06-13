@@ -20,8 +20,6 @@ namespace api_stock.Interfaces
 
         Task<Container?> SafeDeleteContainerAsync(int containerId/*,User user*/);
 
-        Task UpdateContainerParentAsync(int containerId, int? newParentId/*,User user*/);
-
         Task<bool> ContainerExists(int id);
     }
 }

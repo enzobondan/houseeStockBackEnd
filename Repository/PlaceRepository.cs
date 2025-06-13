@@ -73,6 +73,21 @@ namespace api_stock.Repository
             return place;
         }
 
+        public async Task<PlaceDto?> GetPlaceByIdAsync(int placeId)
+        {
+            var existingPlace = await _context.Places
+                .Include(p => p.Tags)
+                .Where(p => p.Id == placeId)
+                .Select(p => new PlaceDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Tags = p.Tags.Select(t => t.Name).ToList()
+                })
+                .FirstOrDefaultAsync();
+            return existingPlace;
+        }
 
         public async Task<List<Place>> GetPlacesAsync(/*User user*/)
         {
@@ -109,13 +124,11 @@ namespace api_stock.Repository
 
         public async Task<Place?> UpdatePlaceAsync(PlaceDto placeDto/*, User user*/)
         {
-            var existingPlace = await _context.Places.FirstOrDefaultAsync(p => p.Id == placeDto.Id /*&& p.UserId == user.Id*/);
+            var existingPlace = await _context.Places.Include(c => c.Tags).FirstOrDefaultAsync(p => p.Id == placeDto.Id /*&& p.UserId == user.Id*/);
             if (existingPlace == null)
             {
                 return null;
             }
-
-
             var tagNames = placeDto.Tags ?? [];
 
             var existingTags = await _context.Tags
@@ -131,6 +144,8 @@ namespace api_stock.Repository
             existingPlace.Name = placeDto.Name;
             existingPlace.Description = placeDto.Description;
             existingPlace.Tags = existingTags;
+
+            _context.Places.Update(existingPlace);
 
             await _context.SaveChangesAsync();
             return existingPlace;

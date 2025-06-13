@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using api_stock.Dtos.Tag;
 using api_stock.Models;
 
 namespace api_stock.Dtos.Container

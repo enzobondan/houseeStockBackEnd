@@ -103,10 +103,17 @@ namespace api_stock.Repository
             .FirstOrDefaultAsync(c => c.Id == dto.Id);
             if (existing == null) return null;
 
+
+            if (dto.ParentContainerId.HasValue && dto.ParentContainerId.Value == dto.Id)
+            {
+                throw new InvalidOperationException("A container cannot be its own parent.");
+            }
+
             if (dto.ParentContainerId.HasValue)
             {
-                var parentExists = await _context.Containers.AnyAsync(c => c.Id == dto.ParentContainerId.Value);
-                if (!parentExists) return false;
+                var parentExists = await _context.Containers.FirstOrDefaultAsync(c => c.Id == dto.ParentContainerId.Value);
+                if (parentExists == null) return false;
+                if (parentExists.ParentContainerId == dto.Id) throw new InvalidOperationException("A container cannot be its child parent.");
             }
 
             if (dto.PlaceId.HasValue)
@@ -137,17 +144,6 @@ namespace api_stock.Repository
             await _context.SaveChangesAsync();
 
             return true;
-        }
-
-
-        public async Task UpdateContainerParentAsync(int containerId, int? newParentId/*,User user*/)
-        {
-            var container = await _context.Containers.FirstOrDefaultAsync(c => c.Id == containerId /*&& c.UserId == user.Id*/);
-            if (container != null)
-            {
-                container.ParentContainerId = newParentId;
-                await _context.SaveChangesAsync();
-            }
         }
 
         public async Task<Container?> GetContainerByIdAsync(int containerId)

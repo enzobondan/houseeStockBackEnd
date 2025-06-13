@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using api_stock.Dtos.Tag;
 using api_stock.Models;
 
 namespace api_stock.Interfaces
@@ -16,8 +17,10 @@ namespace api_stock.Interfaces
 
         Task<Tag?> SafeDeleteTagAsync(string TagName);
 
+        Task<TagDto> UpdateTagAsync(TagDto tagDto);
 
         Task<bool?> ExistingTagAsync(string TagName);
 
+        Task<Tag?> GetTagByIdAsync(int id);
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api_stock.Data;
+using api_stock.Dtos.Tag;
 using api_stock.Interfaces;
 using api_stock.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -37,6 +38,12 @@ namespace api_stock.Repository
             return exists;
         }
 
+        public async Task<Tag?> GetTagByIdAsync(int id)
+        {
+            var tag = await _context.Tags.FirstOrDefaultAsync(t => t.Id == id);
+            return tag;
+        }
+
         public async Task<List<Tag>> GetTagsAsync()
         {
             var tags = _context.Tags.ToList();
@@ -61,6 +68,19 @@ namespace api_stock.Repository
             _context.Tags.Remove(tag);
             await _context.SaveChangesAsync();
             return tag;
+        }
+
+        public async Task<TagDto> UpdateTagAsync(TagDto tagDto)
+        {
+            var tag = await GetTagByIdAsync(tagDto.Id) 
+                ?? throw new InvalidOperationException("Tag not found.");
+
+            tag.Name = tagDto.Name;
+            _context.Tags.Update(tag);
+
+            await _context.SaveChangesAsync();
+
+            return tagDto;
         }
     }
 }

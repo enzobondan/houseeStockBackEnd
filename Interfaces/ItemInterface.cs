@@ -12,7 +12,7 @@ namespace api_stock.Interfaces
     {
         Task<List<Item>> GetItemsByUserAsync(/*User user*/);
 
-        Task<Item> GetItemByIdAsync(int itemId/*,User user*/);
+        Task<ItemDto> GetItemByIdAsync(int itemId/*,User user*/);
 
         Task<Item> CreateItemAsync(CreateItemDto item);
 
@@ -20,6 +20,8 @@ namespace api_stock.Interfaces
 
         Task<Item> UpdateItemAsync(ItemDto item);
         Task<bool> ItemExists(int id);
+
+        Task MarkItemAsModified(Item item);
 
     }
 }

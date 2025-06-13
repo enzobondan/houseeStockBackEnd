@@ -6,8 +6,12 @@ using api_stock.Dtos;
 using api_stock.Dtos.Container;
 using api_stock.Dtos.Item;
 using api_stock.Dtos.Place;
+using api_stock.Dtos.Tag;
 using api_stock.Interfaces;
 using api_stock.Models;
+using api_stock.Repository;
+using Azure;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api_stock.Controllers
@@ -53,7 +57,7 @@ namespace api_stock.Controllers
             return Created();
         }
 
-        [HttpPost("updateItem")]
+        [HttpPut("updateItem")]
         public async Task<IActionResult> UpdateItem(ItemDto itemDto)
         {
             if (itemDto == null) return BadRequest("Item não pode ser nulo");
@@ -67,6 +71,25 @@ namespace api_stock.Controllers
             if (itemModel == null) return NotFound();
             return Ok();
         }
+
+        [HttpPatch("updateItemField/{id}")]
+        public async Task<IActionResult> PartialUpdateItem(int id, [FromBody] JsonPatchDocument<ItemDto> patchDoc)
+        {
+            if (patchDoc == null)
+                return BadRequest("Atualizações não podem ser nulas ou vazias");
+
+            var existingItem = await _itemRepository.GetItemByIdAsync(id);
+            if (existingItem == null)
+                return NotFound("Item não existe");
+
+
+            patchDoc.ApplyTo(existingItem, ModelState);
+
+            await _itemRepository.UpdateItemAsync(existingItem);
+
+            return Ok(existingItem);
+        }
+
 
         [HttpDelete("deleteItem")]
 
@@ -105,7 +128,7 @@ namespace api_stock.Controllers
 
         }
 
-        [HttpPost("updateContainer")]
+        [HttpPut("updateContainer")]
         public async Task<IActionResult> UpdateContainer(ContainerDto containerDto)
         {
             if (containerDto == null) return BadRequest("Container não pode ser nulo");
@@ -117,6 +140,39 @@ namespace api_stock.Controllers
             if (result == false) return BadRequest("Dados inválidos para atualização");
 
             return Ok();
+        }
+
+
+        [HttpPatch("updateContainerField/{id}")]
+        public async Task<IActionResult> PartialUpdateContainer(int id, [FromBody] JsonPatchDocument<ContainerDto> patchDoc)
+        {
+            if (patchDoc == null)
+                return BadRequest("Atualizações não podem ser nulas ou vazias");
+
+            var existingContainer = await _containerRepository.GetContainerByIdAsync(id);
+            if (existingContainer == null)
+                return NotFound("Container não existe");
+
+            var containerDto = new ContainerDto
+            {
+                Id = existingContainer.Id,
+                Name = existingContainer.Name,
+                Description = existingContainer.Description,
+                Tags = existingContainer.Tags?.Select(t => t.Name).ToList() ?? [],
+                PlaceId = existingContainer.PlaceId,
+                ParentContainerId = existingContainer.ParentContainerId,
+                ImagePath = existingContainer.ImagePath
+            }; 
+
+
+            patchDoc.ApplyTo(containerDto, ModelState);
+
+
+            Console.WriteLine($"ContainerDto after patch: {containerDto}");
+
+            await _containerRepository.UpdateContainerAsync(containerDto);
+
+            return Ok(containerDto);
         }
 
         [HttpDelete("deleteContainer")]
@@ -149,7 +205,7 @@ namespace api_stock.Controllers
             return Created();
         }
 
-        [HttpPost("updatePlace")]
+        [HttpPut("updatePlace")]
         public async Task<IActionResult> UpdatePlace(PlaceDto placeDto)
         {
             if (placeDto == null) return BadRequest("Local não pode ser nulo");
@@ -159,6 +215,26 @@ namespace api_stock.Controllers
             var result = await _placeRepository.UpdatePlaceAsync(placeDto);
             if (result == null) return NotFound("Local não encontrado");
             return Ok();
+        }
+        [HttpPatch("updatePlaceField/{id}")]
+        public async Task<IActionResult> PartialUpdatePlace(int id, [FromBody] JsonPatchDocument<PlaceDto> patchDoc)
+        {
+            if (patchDoc == null)
+                return BadRequest("Atualizações não podem ser nulas ou vazias");
+
+            var existingPlace = await _placeRepository.GetPlaceByIdAsync(id);
+            if (existingPlace == null)
+                return NotFound("Item não existe");
+
+
+            patchDoc.ApplyTo(existingPlace, ModelState);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await _placeRepository.UpdatePlaceAsync(existingPlace);
+            return Ok(existingPlace);
         }
 
 
@@ -200,7 +276,7 @@ namespace api_stock.Controllers
 
 
         }
-        
+
         [HttpDelete("deleteTag")]
         public async Task<IActionResult> DeleteTag(string tagName)
         {
@@ -211,5 +287,28 @@ namespace api_stock.Controllers
             await _tagRepository.SafeDeleteTagAsync(tagName);
             return Ok(new { message = "Tag deletada com sucesso" });
         }
+
+        [HttpPut("updateTag")]
+        public async Task<IActionResult> UpdateTag(TagDto newTag)
+        {
+            if (newTag == null) return BadRequest("Tag não pode ser nulo");
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var existingTag = await _tagRepository.GetTagByIdAsync(newTag.Id);
+            if (existingTag == null)
+            {
+                return NotFound("Tag não existe");
+            }
+
+            var updatedTag = await _tagRepository.UpdateTagAsync(newTag);
+
+            if (updatedTag == null)
+            {
+                return BadRequest("Failed to update tag.");
+            }
+
+            return Ok(new { message = "Tag updated successfully", tag = updatedTag });
+        }
+        
     }
 }

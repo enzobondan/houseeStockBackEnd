@@ -29,7 +29,7 @@ namespace api_stock.Controllers
         private readonly PlaceInterface _placeRepository;
 
         public InventoryController(
-            /*UserManager<User> userManager,*/
+            //UserManager<User> userManager,
             ItemInterface itemRepository,
             ContainerInterface containerRepository,
             PlaceInterface placeRepository,
@@ -49,6 +49,20 @@ namespace api_stock.Controllers
             var places = await _placeRepository.GetPlacesAsync();
             return Ok(places);
         }
+
+
+        [HttpGet("placeByIdSimplified")]
+        public async Task<IActionResult> GetPlaceByIdSimplified(int placeId)
+        {
+            var place = await _placeRepository.GetPlaceByIdAsync(placeId);
+            if (place == null)
+            {
+                return NotFound();
+            }
+            return Ok(place);
+        }
+        
+
         [HttpGet("placeById")]
         public async Task<IActionResult> GetPlaceById(int placeId)
         {
@@ -103,7 +117,10 @@ namespace api_stock.Controllers
                 c.Id,
                 c.Name,
                 c.Description,
-                c.Tags,
+                Tags = c.Tags.Select(t => new {
+                    t.Id,
+                    t.Name
+                }).ToList(),
                 c.PlaceId,
                 c.ParentContainerId,
                 c.ImagePath
@@ -135,6 +152,7 @@ namespace api_stock.Controllers
             var tags = await _tagRepository.GetTagsAsync();
             var tagDtos = tags.Select(t => new
             {
+                t.Id,
                 t.Name
             }).ToList();
 
