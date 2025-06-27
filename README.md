@@ -33,4 +33,5 @@ Backend para um sistema de organização doméstica que ajuda usuários a gerenc
 O projeto está totalmente containerizado e pode ser instalado e executado rapidamente usando Docker:
 
 ```bash
+docker-compose pull
 docker-compose up -d
