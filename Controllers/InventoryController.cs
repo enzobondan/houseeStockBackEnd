@@ -61,6 +61,18 @@ namespace api_stock.Controllers
             }
             return Ok(place);
         }
+        
+
+        [HttpGet("placeById")]
+        public async Task<IActionResult> GetPlaceById(int placeId)
+        {
+            var place = await _placeRepository.GetFullPlaceByIdAsync(placeId);
+            if (place == null)
+            {
+                return NotFound();
+            }
+            return Ok(place);
+        }
 
         [HttpGet("container")]
         public async Task<IActionResult> GetContainers(int containerId)

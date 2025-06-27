@@ -13,8 +13,8 @@ services:
       - backend-network
 
   api:
-    build: .
-    container_name: api-stock
+    image: enzoblima/house_stock_backend:latest
+    container_name: house_stock_backend
     ports:
       - "8081:8080"
     depends_on:
@@ -27,3 +27,6 @@ services:
 networks:
   backend-network:
     driver: bridge
+
+volumes:
+  sqlserver_data:
