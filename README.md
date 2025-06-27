@@ -1,3 +1,5 @@
+# House Stock Backend
+
 Backend para um sistema de organização doméstica que ajuda usuários a gerenciar itens, localizar objetos subutilizados e planejar tarefas domésticas. Futuramente será expandido para funcionalidades como todo-lists e listas de compras.
 
 ## ✨ Funcionalidades Atuais
@@ -23,3 +25,12 @@ Backend para um sistema de organização doméstica que ajuda usuários a gerenc
 - **Core**: .NET 6
 - **Persistência**: Entity Framework Core + SQL Server
 - **Autenticação**: JWT (futura implementação)
+- **Containerização**: Docker + Docker Compose
+- **CI/CD**: GitHub Actions (Docker Build & Push)
+
+## 🐳 Docker Deployment
+
+O projeto está totalmente containerizado e pode ser instalado e executado rapidamente usando Docker:
+
+```bash
+docker-compose up -d
