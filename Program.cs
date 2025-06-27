@@ -53,6 +53,11 @@ app.MapControllers();
 
 app.UseCors("AllowFrontend");
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+    db.Database.Migrate(); // Aplica todas as migrations pendentes automaticamente
+}
 
 
 app.Run();

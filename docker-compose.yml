@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      SA_PASSWORD: "Your_password123"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - backend-network
+
+  api:
+    build: .
+    container_name: api-stock
+    ports:
+      - "8081:8080"
+    depends_on:
+      - sqlserver
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+    networks:
+      - backend-network
+
+networks:
+  backend-network:
+    driver: bridge
