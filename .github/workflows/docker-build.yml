@@ -24,4 +24,4 @@ jobs:
       with:
         context: .
         push: true
-        tags: yourusername/api-stock:latest
+        tags: enzoblima/house_stock_backend:latest
