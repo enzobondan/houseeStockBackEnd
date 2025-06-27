@@ -22,7 +22,7 @@ Backend para um sistema de organização doméstica que ajuda usuários a gerenc
 - [ ] API para integração com aplicativos móveis
 
 ## ⚙️ Tecnologias Utilizadas
-- **Core**: .NET 6
+- **Core**: .NET 9
 - **Persistência**: Entity Framework Core + SQL Server
 - **Autenticação**: JWT (futura implementação)
 - **Containerização**: Docker + Docker Compose
