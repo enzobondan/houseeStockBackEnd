@@ -257,7 +257,7 @@ namespace api_stock.Controllers
 
 
         [HttpPost("newTag")]
-        public async Task<IActionResult> CreateTag(string TagName)
+        public async Task<IActionResult> CreateTag([FromBody] string TagName)
         {
             var existingTag = await _tagRepository.ExistingTagAsync(TagName);
 
