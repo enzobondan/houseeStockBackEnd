@@ -257,7 +257,7 @@ namespace api_stock.Controllers
 
 
         [HttpPost("newTag")]
-        public async Task<IActionResult> CreateTag([FromBody] string TagName)
+        public async Task<IActionResult> CreateTag(string TagName)
         {
             var existingTag = await _tagRepository.ExistingTagAsync(TagName);
 
@@ -273,8 +273,6 @@ namespace api_stock.Controllers
                 return BadRequest("Failed to create tag.");
             }
             return Created("Tag created successfully.", new { tag = createTag });
-
-
         }
 
         [HttpDelete("deleteTag")]
